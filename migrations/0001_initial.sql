@@ -1,0 +1,2 @@
+-- Initial schema placeholder.
+-- Add domain migrations before connecting production PostgreSQL.

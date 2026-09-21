@@ -1,0 +1,12 @@
+# MountSea development configuration
+
+environment = "development"
+max_live_nodes = 1
+
+[storage]
+# Configure through deployment secrets in real environments.
+postgres_url = "postgres://localhost/mountsea"
+catalog_root = "./data/catalog"
+
+[observability]
+log_level = "info"

@@ -1,0 +1,57 @@
+[workspace]
+resolver = "2"
+members = [
+    "apps/api",
+    "apps/backtest-worker",
+    "apps/capture-worker",
+    "apps/cli",
+    "apps/node-runtime",
+    "apps/supervisor",
+    "crates/application",
+    "crates/backtest",
+    "crates/capture",
+    "crates/catalog",
+    "crates/cli",
+    "crates/config",
+    "crates/domain",
+    "crates/node-protocol",
+    "crates/node-runtime",
+    "crates/risk",
+    "crates/runtime-adapter",
+    "crates/storage",
+    "crates/strategy",
+    "crates/supervisor",
+]
+
+[workspace.package]
+edition = "2024"
+license = "LGPL-3.0-or-later"
+rust-version = "1.86"
+version = "0.1.0"
+
+[workspace.metadata.project]
+name = "MountSea"
+
+[workspace.dependencies]
+anyhow = "1"
+axum = "0.8"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["macros", "process", "rt-multi-thread", "signal", "sync", "time"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+
+application = { path = "crates/application" }
+backtest = { path = "crates/backtest" }
+capture = { path = "crates/capture" }
+catalog = { path = "crates/catalog" }
+cli = { path = "crates/cli" }
+config = { path = "crates/config" }
+domain = { path = "crates/domain" }
+node-protocol = { path = "crates/node-protocol" }
+node-runtime = { path = "crates/node-runtime" }
+risk = { path = "crates/risk" }
+runtime-adapter = { path = "crates/runtime-adapter" }
+storage = { path = "crates/storage" }
+strategy = { path = "crates/strategy" }
+supervisor = { path = "crates/supervisor" }

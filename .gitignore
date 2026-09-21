@@ -1,0 +1,12 @@
+/target/
+/.idea/
+/.vscode/
+*.log
+.env
+.env.*
+!.env.example
+
+# Local data and runtime state
+/data/
+/logs/
+*.pid
