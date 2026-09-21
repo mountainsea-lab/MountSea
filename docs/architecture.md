@@ -13,6 +13,9 @@
 本文用于项目立项、模块拆分、接口设计、实施排期和阶段验收。它描述目标平台的架构边界，
 不表示 NautilusTrader 已经原生提供本文全部平台能力。
 
+具体功能任务、依赖顺序和阶段完成标准参见
+[`development-roadmap.md`](development-roadmap.md)。
+
 ## 决策摘要
 
 | 主题 | 架构决策 |
@@ -294,7 +297,7 @@ mountsea/
 | `apps/supervisor` | 启动 Supervisor 守护进程并装配操作系统资源。 | Node 子进程管理、心跳、健康检查、恢复、对账 Gate 和 Kill Switch 编排。 | Node 内订单状态机、Portfolio 计算和 Venue 协议。 | `supervisor` |
 | `apps/node-runtime` | 启动单个隔离交易 Node。 | 加载一个 Deployment，构建一个 `LiveNode`，注册策略和 Adapter，响应 Supervisor IPC。 | 多 Node 调度、Web API 和平台审批。 | `node-runtime` |
 | `apps/backtest-worker` | 启动隔离的回测 Worker。 | 领取一个 BacktestJob，加载固定版本数据和策略，执行并保存结果。 | 交互式研究、任务排队策略和实盘交易。 | `backtest` |
-| `apps/capture-worker` | 启动行情采集 Worker。 | 连接数据源、分段采集、校验并提交 DatasetVersion。 | 策略交易、回测调度和 Catalog 查询 API。 | `capture` |
+| `apps/capture-worker` | 启动 `catalog_capture` 集成 Worker。 | 下发采集计划、跟踪外部采集进程、接收结果并登记 DatasetVersion。 | 重写行情连接、分段、Parquet 写入或 Catalog 生命周期。 | `capture` |
 
 应用包使用 `mountsea-*` 名称，是为了标识 MountSea 官方二进制。其他交易系统可以直接组合
 `crates/` 中的库，建立不同的应用入口，而不依赖这些二进制包。
@@ -315,7 +318,7 @@ mountsea/
 | `supervisor` | 提供可嵌入的运行实例监督能力。 | 子进程生命周期、IPC 会话、心跳、资源与队列监控、恢复和 Reconciliation Gate。 | 不承载 Web 路由，不运行策略，不实现 Venue Adapter。 | `config`、`domain`、`node-protocol` |
 | `node-runtime` | 提供可组合的单 Node 运行能力。 | Deployment 加载、LiveNode 构建、策略注册、运行控制、状态上报和安全停止。 | 一个实例只拥有一个并发 `LiveNode`；不管理其他 Node。 | `config`、`domain`、`node-protocol`、`risk`、`runtime-adapter` |
 | `backtest` | 提供可组合的确定性回测执行能力。 | 校验 BacktestJob、读取已提交数据集、构建引擎、执行、取消、结果和复现元数据。 | 不负责队列产品选型、HTTP 接口或实盘生命周期。 | `catalog`、`config`、`domain`、`runtime-adapter`、`storage` |
-| `capture` | 提供可组合的行情采集和发布能力。 | 数据源连接、分段、校验、Promotion、Manifest 和 CommitMarker。 | 不进行策略计算和交易，不绕过 Catalog 发布协议。 | `catalog`、`config` |
+| `capture` | 提供 `catalog_capture` 与 MountSea 的集成编排。 | 采集计划映射、外部进程或协议调用、状态跟踪、结果导入和 DatasetVersion 登记。 | 不重写数据源连接、分段、Parquet 写入和 Catalog 生命周期；这些能力归 `catalog_capture`。 | `catalog`、`config` |
 | `cli` | 提供与终端无关的命令用例适配。 | 将命令映射到 Application 用例，统一输入、输出和错误展示模型。 | 不解析 HTTP，不直接访问数据库，不承载领域规则。 | `application` |
 
 以上“直接依赖”与当前 Cargo Workspace 清单保持一致。随着端口和 Adapter 落地，可以增加实现
@@ -445,11 +448,15 @@ backtest → storage：保存状态、结果索引、指标和复现元数据
 #### 行情采集与数据发布
 
 ```text
-mountsea-capture-worker → capture → Data Provider
-capture → catalog：写临时分片、校验、生成 Manifest 和 CommitMarker
+mountsea-capture-worker → capture：创建并跟踪采集运行
+capture → catalog_capture：下发采集计划并获取 Manifest、Checksum 和提交结果
+capture → catalog：校验外部结果并登记 DatasetVersion
 catalog → domain：更新 DatasetVersion 状态
 已提交 DatasetVersion → backtest / research reader
 ```
+
+MountSea 不复制 `catalog_capture` 的行情连接和文件生命周期实现。`capture` 只维护平台控制面集成，
+具体采用子进程、CLI、库或服务协议，应在集成 Spike 后通过 ADR 固化。
 
 #### 运维 CLI
 
@@ -899,6 +906,8 @@ Cancel-all、Stop-new-exposure 和小资金发布。
 | Scale Gate | 观察期内没有未解释状态差异，审计、备份和恢复材料完整。 |
 
 任何 Gate 失败都阻止自动晋级。Live 自动重启不得绕过 Reconciliation 和风险判定。
+各阶段的可领取任务和横向完成标准以
+[`development-roadmap.md`](development-roadmap.md) 为准。
 
 ## 11. 架构结论
 

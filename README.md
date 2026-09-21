@@ -17,7 +17,7 @@ mountsea/
 │   ├── supervisor/               # 进程监督入口
 │   ├── node-runtime/             # 隔离交易 Node 入口
 │   ├── backtest-worker/          # 回测 Worker 入口
-│   └── capture-worker/           # 行情采集 Worker 入口
+│   └── capture-worker/           # catalog_capture 集成 Worker 入口
 ├── crates/                       # 可复用、可组合的功能库
 │   ├── application/              # 应用用例与事务编排
 │   ├── domain/                   # 领域对象与状态机
@@ -31,7 +31,7 @@ mountsea/
 │   ├── supervisor/               # 生命周期、健康检查与恢复编排
 │   ├── node-runtime/             # LiveNode 构建与运行编排
 │   ├── backtest/                 # 回测执行能力
-│   ├── capture/                  # 行情采集能力
+│   ├── capture/                  # catalog_capture 编排与平台集成
 │   └── cli/                      # 可复用 CLI 命令用例
 ├── docs/
 ├── migrations/
@@ -51,13 +51,13 @@ mountsea/
 ## 当前状态
 
 当前仓库是架构骨架。交易功能、数据库迁移、外部凭证和生产部署尚未实现。完整设计参见
-[`docs/architecture.md`](docs/architecture.md)。
+[`docs/architecture.md`](docs/architecture.md)，按依赖和风险排序的实现计划参见
+[`docs/development-roadmap.md`](docs/development-roadmap.md)。
 
 ## 开源协议
 
 MountSea 与 `catalog_capture` 保持一致，采用
 [GNU Lesser General Public License v3.0 or later](LICENSE)。
-
 
 ## 代码仓库
 
